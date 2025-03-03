@@ -1,12 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "cd cosmic && npm install && npm run build",
-  "outputDirectory": "cosmic/.next",
-  "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/cosmic/$1"
-    }
-  ]
+  "rootDirectory": "cosmic",
+  "framework": "nextjs"
 } 
