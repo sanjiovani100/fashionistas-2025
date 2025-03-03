@@ -1,0 +1,11 @@
+{
+  "name": "fashionistas-20",
+  "version": "1.0.0",
+  "description": "Project with Vercel MCP integration",
+  "scripts": {
+    "start": "cd vercel-mcp-server && npm run start",
+    "build": "cd vercel-mcp-server && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true
+} 
