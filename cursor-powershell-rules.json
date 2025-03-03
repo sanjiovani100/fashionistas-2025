@@ -1,0 +1,27 @@
+{
+  "language": {
+    "powershell": {
+      "commandSeparator": ";",
+      "disallowedOperators": ["&&", "||"],
+      "preferredOperators": {
+        "and": "-and",
+        "or": "-or",
+        "commandChaining": ";"
+      },
+      "environmentChecks": {
+        "validateWorkingDirectory": true
+      }
+    }
+  },
+  "completions": {
+    "powershell": {
+      "snippets": [
+        {
+          "prefix": "run-localhost",
+          "body": "cd $PWD; Start-Process 'http://localhost:$1'; $2",
+          "description": "Navigate to current directory and start localhost"
+        }
+      ]
+    }
+  }
+}

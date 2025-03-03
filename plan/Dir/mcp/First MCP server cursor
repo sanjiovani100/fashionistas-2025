@@ -1,0 +1,57 @@
+Build Your First MCP Tool in Cursor in Just 2 Minutes
+
+https://egghead.io/build-your-first-mcp-tool-in-cursor-in-just-2-minutes~i8kyo
+
+Build Your First MCP Tool in Cursor in Just 2 Minutes
+John Lindquist
+Instructor
+John Lindquist
+
+5
+cursor
+Cursor (ide)
+GenAI
+https://github.com/johnlindquist/mcp-cursor-tool-starter/tree/main
+
+Cursor's AI is powerful, but it can't do everything. What if you could give it the ability to interact with your specific workflows, tools, and data? This lesson shows you how to do exactly that by building a custom MCP tool – and we'll do it in under two minutes!
+
+We'll leverage the Model Context Protocol (MCP), an open standard that bridges the gap between AI agents (like Cursor's Composer) and your custom code. By creating an MCP tool, you're essentially giving Cursor a new skill.
+
+Here's the breakdown:
+
+Understanding MCP: We'll briefly cover what the Model Context Protocol (MCP) is and why it's the key to extending Cursor's functionality. In short, it enables communication between the AI and your tools in a standardized way.
+
+Fast Track Setup: We'll use a ready-made starter project (a single TypeScript file and package.json) to skip the boilerplate and get straight to the core concepts.
+
+Step-by-Step Integration: We'll walk through the simple process of:
+
+Cloning the starter project.
+
+Installing dependencies with pnpm install.
+
+Running the starter server.
+
+Adding the tool to Cursor's MCP settings (under Features > MCP).
+
+Verifying that your tool is working
+
+Real-World Example: We'll demonstrate the tool in action, using Cursor's Composer to create a new GitHub issue using the gh CLI, all driven by our custom MCP tool.
+
+This lesson is about more than just building one tool; it's about understanding how to extend Cursor's capabilities to fit your unique development needs. You'll learn the foundational steps to create a whole ecosystem of AI-powered tools.
+
+Share with a coworker
+
+Transcript
+[00:00] So the starter is really just a single TypeScript file with a package.json listing the packages to install. So we'll go ahead and grab this, clone it into, I use a dev directory, and then once we go into this directory, just install the packages and that's really all you need to do. Then check that you can run source index and if you see server is running then you're in business. So we're going to take this command and just make sure we get the full path to each of these. So I'm going to get the full path to node and I installed it through PNPM so I have node 23 here.
+
+[00:36] You can use bun or dno or anything to run a TypeScript file. I'll just copy this full path using pbcopy then over in cursor In your MCP servers you click add new, we'll call this GitHub tools, swap the type over to command, and then we say run node, and then the path to the script. So grab the full path here, pbcopy, swap back over, and paste that in, and point it to source index like we said. Click add, and then you'll see we have GitHub tools added here where the tools listed are create issue. So to peek at these tools real quick if we look at this.
+
+[01:16] So to break this down, our server exposes a tool called create-issue. We're going to force the AIs that call this to pass in a current working directory, a title, and a body. So that way when we run the GitHub CLI It will run it from the current working directory, meaning the project directory of the Composer project we're using. It'll run the GitHub CLI with github issue create and then the title. Here's the title we pass in.
+
+[01:42] And then the body is going to be transformed into a file which is a markdown file so that it can be well formatted and then use the body file flag. This will all be joined together and then run as a command and then the result of this will be passed back to Composer which is our AI tool invoking this saying it created the issue at this URL. One note here is I did hardcode the path to the GitHub CLI so if you try this on your machine make sure you either update this path or expose a path through an argument. It's very possible that This would work on your machine if Cursor is properly loading in the path. That may not always be the case, and I currently don't see a way in Cursor to set environment variables that get loaded into MCP servers, whereas tools like MCP Inspector allow you to load them in this way.
+
+[02:33] So I imagine that feature is coming. Now if we go into a file and we open Composer with Command-I, you can say Use Create Issue, then I'll dictate to set up an issue to make sure we extract all the strings as constants. And then with Composer in agent mode I'll hit submit. It'll start doing some work and then it'll hit your tool here once it realizes it needs to use it. And you can expand this to see what it's doing.
+
+[02:57] You can see the current working directory, the title, and the body. I'll go ahead and run it and you can see it successfully created the issue. I can't copy and paste this URL so I'll have to open it manually. I'm actually going to use the GitHub CLI to say browse, which will pop open my browser to the repo and you can see the issues here. I have this new issue created by Composer with nicely formatted markdown where it identified some string literals that we need to extract and this was all done in a single command in Composer.
+
+[03:28] Some closing thoughts here, I do believe that spending time building generic tools around creating GitHub issues and things like this might be time wasted because these seem like low-hanging fruit for Cursor or GitHub to build themselves. So when building MCP tools, focus on things that are specific to your workflows that you'll run in-house or that maximize your own productivity.

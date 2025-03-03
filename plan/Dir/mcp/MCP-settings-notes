@@ -1,0 +1,268 @@
+
+
+
+Having trouble getting MCP servers to connect in Cursor IDE, especially when using npx? If you’re on Windows, try setting the ‘Command’ in the MCP server configuration to:
+
+cmd /c npx [your-mcp-server-command]
+
+For example:
+
+cmd /c npx @agentdeskai/browser-tools-mcp@1.0.11
+
+This forces the command to execute in the traditional command prompt environment, which often resolves pathing and execution issues. Also, make sure to install any packages globally (npm install -g) and find the correct node version/directory. If issues, check your node/nvm version/config/permissions with where node
+
+If this doesn’t fix it:
+
+Ensure and check for a “ListTools” function to your node
+
+Check that you have a correct file path node C:/path/to/index.js
+
+Try a hard-coded version of the api key and install dependancies
+
+
+Using cmd /c does indeed make the MCP server work, but there will still be an external command window that remains open; otherwise, it stops working
+
+
+Can confirm, running an MCP server in stdio mode worked for me when putting everything into a shell script, as opposed to one long command with env vars at the front.
+
+In other words, the below did not work for me as a “command” in the Cursor MCP setup:
+
+ENV_VAR_1=foo ENV_VAR_2=bar mcp-server-startup-command
+But this did:
+
+/path/to/the/executable/script/below
+#!/bin/bash
+
+export ENV_VAR_1=foo
+export ENV_VAR_2=bar
+mcp-server-startup-command
+
+
+
+
+You can wrap any config like API keys in a startup script and include it in the build. e.g. you place you API keys in a .env file in your root folder and include the start-server.js script in the build.
+
+#!/usr/bin/env node
+
+// Load environment variables from .env file
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { config } from 'dotenv';
+
+// Get the directory where this script is located
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env file from the project root (two levels up if in build directory)
+const envPath = resolve(__dirname, '..', '.env');
+config({ path: envPath });
+
+// Import and run the server
+import('./index.js').catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+}); 
+in the index.js file you then simply refer to the key in the .env file:
+
+// Load environment variables
+const API_KEY = process.env.YOUR_API_KEY ?? "";
+This has worked for me.
+
+
+Thanks this finally worked for me. I was also having issues with Brave Search but got that fixed by adding the API key to the Brave Search file.
+
+Sequential Thinking Server Setup
+Install the package globally:
+Copy
+
+npm install -g @modelcontextprotocol/server-sequential-thinking
+In Cursor’s MCP configuration, use this command:
+Copy
+
+node C:/Users/[YourUsername]/AppData/Roaming/npm/node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js
+(Replace [YourUsername] with your Windows username)
+
+Brave Search Server Setup
+Install the package globally:
+Copy
+
+npm install -g @modelcontextprotocol/server-brave-search
+You’ll need to modify the server’s index.js file to include your API key:
+Open this file in a text editor:
+Copy
+
+C:/Users/[YourUsername]/AppData/Roaming/npm/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js
+Add this line before the const BRAVE_API_KEY declaration:
+javascript
+
+Copy
+
+process.env.BRAVE_API_KEY = 'YOUR_API_KEY_HERE';
+In Cursor’s MCP configuration, use this command:
+Copy
+
+node C:/Users/[YourUsername]/AppData/Roaming/npm/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js
+Important Notes:
+Use forward slashes (/) in paths instead of backslashes
+Don’t use quotes around the paths
+Avoid spaces in paths
+If you see flashing terminals, it usually means the server is crashing - check for missing environment variables or incorrect paths
+This workaround is particularly useful since Cursor currently has issues handling environment variables through its UI.
+
+
+Do you guys have a manager like nvm installed? try npm install -g @modelcontextprotocol/server-sequential-thinking . close and open cursor and retry. if doesn’t work try full path to npx . ie which npx to get full path and use full path in command /home/myname/.nvm/versions/node/v20.11.0/bin/npx -y @modelcontextprotocol/server-sequential-thinking see if…
+Someone does this and this helped me. If you have mulitple nodejs version in your PC. You can use direct path to fix it.
+
+I use node through NVM btw.
+I add MCP with command type:
+
+npx -y @modelcontextprotocol/server-sequential-thinking
+I get this in my Cursor MCP output:
+
+2025-02-09 21:56:00.804 [info] [MCP] Handling ListTools action for stdio server: npx -y @modelcontextprotocol/server-sequential-thinking
+2025-02-09 21:56:00.805 [info] [MCP] Listing tools from stdio server with identifier: npx -y @modelcontextprotocol/server-sequential-thinking
+2025-02-09 21:56:00.805 [info] [MCP] Creating client for stdio server: npx -y @modelcontextprotocol/server-sequential-thinking
+2025-02-09 21:56:00.805 [info] [MCP] Expanded command path: npx -y @modelcontextprotocol/server-sequential-thinking
+2025-02-09 21:56:00.805 [info] [MCP] Starting new stdio process with command: npx -y @modelcontextprotocol/server-sequential-thinking
+2025-02-09 21:56:00.805 [error] [MCP] Client error for command 'npx -y @modelcontextprotocol/server-sequential-thinking': A system error occurred (spawn npx ENOENT)
+2025-02-09 21:56:00.805 [error] [MCP] Failed to connect to stdio server with command 'npx -y @modelcontextprotocol/server-sequential-thinking': A system error occurred (spawn npx ENOENT)
+2025-02-09 21:56:00.805 [error] [MCP] Error listing tools for stdio server npx -y @modelcontextprotocol/server-sequential-thinking: A system error occurred (spawn npx ENOENT)
+I can not make the syntax lighting, I try ```log, but it did not work
+
+
+
+solution to this problem is to make sure the path where you install the server doesn’t contain spaces.
+
+e.g:
+node C:/my projects/mcpserver/build/index.js will fail because of a space in “my projects”
+node C:/projects/mcpserver/build/index.js will work as there are no spaces
+
+notes:
+
+I’m on windows 11 and I’ve tried forward and backslashes and they both work. I just tried forward slashes first, so copying the path of the index.js file in the build folder also works.
+
+I run nvm and I’ve also tried running the server global with spaces in the path and that also didn’t work, with or without full paths to node.exe and the index.js file and with or without quotes around the full paths - Getting rid of spaces in the path was my solution.
+
+You don’t need to run the server manually before adding the command - the command will start the server automatically - just in case you weren’t sure. You should, however, first try to start and stop the server manually before adding it to cursor so you know the server starts without errors.
+
+This isn’t the only possible cause or solution - I’m sure there are other reasons why it may fail to find tools.
+
+How I found out:
+
+In my case I had:
+D:\My Data\Projects.…
+
+When I tried adding (or refreshing) any MCP server that’s installed in a subdirectory in the path above I briefly see a terminal flashing and a node executable being added and removed to the task manager. I wanted to know what is going on and used the free sysinternals ProcessMonitor tool to check what cursor is trying to execute.
+
+I set the command in the add MCP server without quotes around the path and got this when I refreshed the server:
+
+
+ had the same issue using NVM. The answer here is to switch to your preferred node version, globally install the dependency so npm i -g @modelcontextprotocol/server-sequential-thinking, then set the direct path on the node version and the dependency within that node version.
+
+So: C:/Users/<username>/AppData/Roaming/nvm/v<version>/node.exe C:/Users/<username>/AppData/Roaming/nvm/v<version>/node_modules/@modelcontextprotocol/server-postgres/dist/index.js <your-connection-string>
+
+Let me know if that works for you.
+
+What worked for me was finding the node version I wanted to use inside AppData/roaming/nvm/[version]/node.exe
+
+Then running “npm i -g @modelcontextprotocol/server-postgres”
+
+Then locate the .js file in the server which was inside AppData/roaming/npm/node_modules
+
+What I put into Cursor was
+
+C:\Users[USER]\AppData\Roaming\nvm\v20.12.0\node.exe
+C:\Users[USER]\AppData\Roaming\npm\node_modules@modelcontextprotocol\server-postgres\dist\index.js
+
+For me, using the absolute path instead of a npx command worked for me.
+
+For me, using the absolute path instead of a npx command worked for me.
+
+Try this in the meantime while cursor fixes the issue: GitHub - daniel-lxs/mcp-starter
+https://github.com/daniel-lxs/mcp-starter
+
+https://github.com/AgentDeskAI/browser-tools-mcp
+
+
+https://github.com/AgentDeskAI/browser-tools-mcp/issues/5
+
+
+
+I had the same issue and after digging the web and investigating it I think I found a solution. It's happening to Windows users, MCP doesn't run properly, you need to put a different command in the MCP server config in Cursor:
+node C:/Users/[Your_Username]/AppData/Roaming/npm/node_modules/@agentdeskai/browser-tools-mcp/dist/mcp-server.js
+
+You can check whta is your username by running from bash shell the following command:
+npm config get prefix
+
+One you've added the node command to Cursor it will create a new empty cmd window to run the mcp, and on Cursor you will see that the MCP works as expected
+
+Just adding to this issue. I had the same problem on Windows 11 and was able to fix it by installing the package globally with:
+
+npm i -g @agentdeskai/browser-tools-mcp
+Then, I configured the Cursor MCP Server command as follows:
+
+node C:\Users\$USER\AppData\Roaming\npm\node_modules\@agentdeskai\browser-tools-mcp\dist\mcp-server.js
+The only issue now is that every time I open Cursor, a new terminal window opens along with it. I’m not sure if this happens on other systems and is expected behavior, or if it is specific to Windows.
+
+Indeed, the command npx @agentdeskai/browser-tools-mcp doesn't work.
+
+npx needs an interpreter
+use “cmd /k npx @agentdeskai/browser-tools-mcp” as command
+
+My statement.
+
+How NPX, Shell, and Child Processes Work on Windows:
+
+NPX is a tool for running Node.js packages without installing them globally.
+When you run npx some-command, NPX starts as a process and creates a child process for your app.
+On Windows, this child process needs a shell environment to properly handle input/output and termination.
+Using cmd /k npx some-command ensures the shell stays open, preventing unexpected process termination.
+Unix systems handle this differently due to their built-in process management.
+
+
+
+
+https://egghead.io/build-your-first-mcp-tool-in-cursor-in-just-2-minutes~i8kyo
+
+https://github.com/johnlindquist/mcp-cursor-tool-starter/tree/main
+
+Build Your First MCP Tool in Cursor in Just 2 Minutes
+John Lindquist
+Instructor
+John Lindquist
+
+5
+cursor
+Cursor (ide)
+GenAI
+https://github.com/johnlindquist/mcp-cursor-tool-starter/tree/main
+
+Cursor's AI is powerful, but it can't do everything. What if you could give it the ability to interact with your specific workflows, tools, and data? This lesson shows you how to do exactly that by building a custom MCP tool – and we'll do it in under two minutes!
+
+We'll leverage the Model Context Protocol (MCP), an open standard that bridges the gap between AI agents (like Cursor's Composer) and your custom code. By creating an MCP tool, you're essentially giving Cursor a new skill.
+
+Here's the breakdown:
+
+Understanding MCP: We'll briefly cover what the Model Context Protocol (MCP) is and why it's the key to extending Cursor's functionality. In short, it enables communication between the AI and your tools in a standardized way.
+
+Fast Track Setup: We'll use a ready-made starter project (a single TypeScript file and package.json) to skip the boilerplate and get straight to the core concepts.
+
+Step-by-Step Integration: We'll walk through the simple process of:
+
+Cloning the starter project.
+
+Installing dependencies with pnpm install.
+
+Running the starter server.
+
+Adding the tool to Cursor's MCP settings (under Features > MCP).
+
+Verifying that your tool is working
+
+Real-World Example: We'll demonstrate the tool in action, using Cursor's Composer to create a new GitHub issue using the gh CLI, all driven by our custom MCP tool.
+
+This lesson is about more than just building one tool; it's about understanding how to extend Cursor's capabilities to fit your unique development needs. You'll learn the foundational steps to create a whole ecosystem of AI-powered tools.
+
+Thanks! I got it to finally work by removing the dashes from my tool names
+
+Same, using underscores instead of dashes fixed it for me.
